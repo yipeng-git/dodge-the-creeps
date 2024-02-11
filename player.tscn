@@ -1,0 +1,101 @@
+[gd_scene load_steps=8 format=3 uid="uid://d1vyicxggyixb"]
+
+[ext_resource type="Texture2D" uid="uid://dvx5q4knhyexe" path="res://art/playerGrey_up1.png" id="1_7o74e"]
+[ext_resource type="Texture2D" uid="uid://ccidmxgthdnnk" path="res://art/playerGrey_up2.png" id="2_f6rco"]
+[ext_resource type="Texture2D" uid="uid://3i6ac350161u" path="res://art/playerGrey_walk1.png" id="3_5x8gy"]
+[ext_resource type="Texture2D" uid="uid://cnw0v6g2awng2" path="res://art/playerGrey_walk2.png" id="4_1lfnk"]
+
+[sub_resource type="GDScript" id="GDScript_0paus"]
+script/source = "extends Area2D
+signal hit
+
+@export var speed = 400
+var screen_size
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	screen_size = get_viewport_rect().size
+	hide()
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta):
+	var velocity = Vector2.ZERO
+	if Input.is_action_pressed(\"left\"):
+		velocity.x -= 1
+	if Input.is_action_pressed(\"right\"):
+		velocity.x += 1
+	if Input.is_action_pressed(\"up\"):
+		velocity.y -= 1
+	if Input.is_action_pressed(\"down\"):
+		velocity.y += 1
+	if velocity.length() > 0:
+		velocity = velocity.normalized() * speed
+		$AnimatedSprite2D.play()
+	else:
+		$AnimatedSprite2D.stop()
+	position += velocity * delta
+	position = position.clamp(Vector2.ZERO, screen_size)
+	#print(position)
+	if velocity.x != 0:
+		$AnimatedSprite2D.animation = \"walk\"
+		$AnimatedSprite2D.flip_v = false
+		$AnimatedSprite2D.flip_h = velocity.x < 0
+	elif velocity.y != 0:
+		$AnimatedSprite2D.animation = \"up\"
+		$AnimatedSprite2D.flip_v = velocity.y > 0
+
+
+func _on_body_entered(_body):
+	hide()
+	hit.emit()
+	$CollisionShape2D.set_deferred(\"disable\", true)
+
+func start(pos):
+	position = pos
+	show()
+	$CollisionShape2D.disabled = false
+"
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_2p4sm"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_7o74e")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_f6rco")
+}],
+"loop": true,
+"name": &"up",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_5x8gy")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_1lfnk")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_rnwks"]
+radius = 54.0
+height = 136.0
+
+[node name="Player" type="Area2D"]
+scale = Vector2(0.5, 0.5)
+script = SubResource("GDScript_0paus")
+metadata/_edit_group_ = true
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_2p4sm")
+animation = &"walk"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CapsuleShape2D_rnwks")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
