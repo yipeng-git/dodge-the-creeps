@@ -1,0 +1,87 @@
+[gd_scene load_steps=10 format=3 uid="uid://e58e2js4sbm2"]
+
+[ext_resource type="Texture2D" uid="uid://eyvemp0aulwe" path="res://art/enemyFlyingAlt_1.png" id="1_w16wt"]
+[ext_resource type="Texture2D" uid="uid://cucpkc6x3xqpe" path="res://art/enemyFlyingAlt_2.png" id="2_kj8q4"]
+[ext_resource type="Texture2D" uid="uid://bocoq5d7g4yew" path="res://art/enemySwimming_1.png" id="3_1cvpo"]
+[ext_resource type="Texture2D" uid="uid://b84u7b4lds4jb" path="res://art/enemySwimming_2.png" id="4_k7awn"]
+[ext_resource type="Texture2D" uid="uid://bs2cy0d0i118f" path="res://art/enemyWalking_1.png" id="5_ycxv4"]
+[ext_resource type="Texture2D" uid="uid://yxdkupmaa7gc" path="res://art/enemyWalking_2.png" id="6_lw5od"]
+
+[sub_resource type="GDScript" id="GDScript_4ti88"]
+script/source = "extends RigidBody2D
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	var mob_types = $AnimatedSprite2D.sprite_frames.get_animation_names()
+	$AnimatedSprite2D.play(mob_types[randi() % mob_types.size()])
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta):
+	pass
+
+
+
+func _on_visible_on_screen_notifier_2d_screen_exited():
+	queue_free()
+"
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_vubw7"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_w16wt")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_kj8q4")
+}],
+"loop": true,
+"name": &"fly",
+"speed": 3.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_1cvpo")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_k7awn")
+}],
+"loop": true,
+"name": &"swim",
+"speed": 3.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_ycxv4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_lw5od")
+}],
+"loop": false,
+"name": &"walk",
+"speed": 3.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_fo4o0"]
+radius = 36.0
+height = 98.0
+
+[node name="Mob" type="RigidBody2D" groups=["mobs"]]
+collision_mask = 0
+gravity_scale = 1.66533e-16
+script = SubResource("GDScript_4ti88")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.75, 0.75)
+sprite_frames = SubResource("SpriteFrames_vubw7")
+animation = &"walk"
+frame = 1
+frame_progress = 1.0
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+rotation = 1.5708
+shape = SubResource("CapsuleShape2D_fo4o0")
+
+[connection signal="screen_exited" from="VisibleOnScreenNotifier2D" to="." method="_on_visible_on_screen_notifier_2d_screen_exited"]

@@ -46,7 +46,7 @@ func _process(delta):
 		$AnimatedSprite2D.flip_v = velocity.y > 0
 
 
-func _on_body_entered(body):
+func _on_body_entered(_body):
 	hide()
 	hit.emit()
 	$CollisionShape2D.set_deferred(\"disable\", true)
@@ -54,7 +54,8 @@ func _on_body_entered(body):
 func start(pos):
 	position = pos
 	show()
-	$CollisionShape2D.disable = false"
+	$CollisionShape2D.disabled = false
+"
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_2p4sm"]
 animations = [{
